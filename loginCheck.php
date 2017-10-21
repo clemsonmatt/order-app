@@ -6,7 +6,7 @@ const REQUIRED_PASSWORD = 'pass';
 $username = $_POST['username'];
 $password = $_POST['password'];
 
-if ($username == REQUIRED_USERNAME || $password == REQUIRED_PASSWORD) {
+if ($username == REQUIRED_USERNAME && $password == REQUIRED_PASSWORD) {
     session_start();
     $_SESSION['cso'] = md5($username);
 
