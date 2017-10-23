@@ -13,8 +13,13 @@
  * PIPELINE_REPORTED_DATE - date order was completed and pushed into billing
  */
 
-class PurchaseOrder
+class PurchaseOrder implements JsonSerializable
 {
+    public function jsonSerialize()
+    {
+        return get_object_vars($this);
+    }
+
     private $id;
     private $orderAccountName;
     private $billingAccountNumber;
