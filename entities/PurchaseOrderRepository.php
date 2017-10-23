@@ -7,28 +7,41 @@ class PurchaseOrderRepository
 {
     public function findAllOrders()
     {
-        // $orders = [];
-
-        // for ($i = 0; $i < 10; $i++) {
-        //     $orders[] = $this->createOrder();
-        // }
-
         $db   = new Database();
         $conn = $db->getConnection();
 
-        $query = oci_parse($conn, 'SELECT * FROM EXAMPLE.TEST_DATA_SUMMARY');
-        oci_execute($query);
+        $result = $conn->query("SELECT * FROM `EXAMPLE.TEST_DATA_SUMMARY`");
 
-        $orders = oci_fetch_array($query, OCI_ASSOC+OCI_RETURN_NULLS);
+        $purchaseOrders = [];
 
-        return $orders;
+        while ($order = $result->fetch_assoc()) {
+            $purchaseOrder = new PurchaseOrder();
+            $purchaseOrder->hydrate($order);
+
+            $purchaseOrders[] = $purchaseOrder;
+        }
+
+        return $purchaseOrders;
     }
 
     public function findOrderById(int $id)
     {
-        $order = $this->createOrder($id);
+        $db   = new Database();
+        $conn = $db->getConnection();
 
-        return $order;
+        $query = "SELECT * FROM `EXAMPLE.TEST_DATA_SUMMARY` WHERE PRIMARY_KEY = ?";
+
+        $stmt = $conn->prepare($query);
+        $stmt->bind_param('i', $id);
+        $stmt->execute();
+
+        $result = $stmt->get_result();
+        $order  = $result->fetch_assoc();
+
+        $purchaseOrder = new PurchaseOrder();
+        $purchaseOrder->hydrate($order);
+
+        return $purchaseOrder;
     }
 
     private function createId()
