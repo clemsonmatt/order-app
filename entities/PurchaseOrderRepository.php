@@ -1,16 +1,25 @@
 <?php
 
 require_once('PurchaseOrder.php');
+require_once('config/Database.php');
 
 class PurchaseOrderRepository
 {
     public function findAllOrders()
     {
-        $orders = [];
+        // $orders = [];
 
-        for ($i = 0; $i < 10; $i++) {
-            $orders[] = $this->createOrder();
-        }
+        // for ($i = 0; $i < 10; $i++) {
+        //     $orders[] = $this->createOrder();
+        // }
+
+        $db   = new Database();
+        $conn = $db->getConnection();
+
+        $query = oci_parse($conn, 'SELECT * FROM EXAMPLE.TEST_DATA_SUMMARY');
+        oci_execute($query);
+
+        $orders = oci_fetch_array($query, OCI_ASSOC+OCI_RETURN_NULLS);
 
         return $orders;
     }

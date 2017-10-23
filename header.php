@@ -7,8 +7,6 @@ if (! isset($_SESSION['cso'])) {
     header('location:login.php');
 }
 
-require_once('oracle.inc.php');
-
 ?>
 
 <!DOCTYPE html>
