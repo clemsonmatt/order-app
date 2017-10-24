@@ -35,7 +35,9 @@ class PurchaseOrder implements JsonSerializable
                 $name = str_replace(' ', '', $name);
             }
 
-            $this->{'set'.$name}($value);
+            if (method_exists($this, 'set'.$name)) {
+                $this->{'set'.$name}($value);
+            }
         }
     }
 

@@ -1,5 +1,6 @@
 <?php
 
+require_once('OrderDetails.php');
 require_once('PurchaseOrder.php');
 require_once('config/Database.php');
 
@@ -29,7 +30,11 @@ class PurchaseOrderRepository
         $db   = new Database();
         $conn = $db->getConnection();
 
-        $query = "SELECT * FROM `EXAMPLE.TEST_DATA_SUMMARY` WHERE PRIMARY_KEY = ?";
+        $query = "
+            SELECT tds.*, tdd.ORDER_DETAILS FROM `EXAMPLE.TEST_DATA_SUMMARY` tds
+            LEFT JOIN `EXAMPLE.TEST_DATA_DETAIL` tdd ON tds.SRC_ORDER_ID = tdd.SRC_ORDER_ID
+            WHERE tds.PRIMARY_KEY = ?
+        ";
 
         $stmt = $conn->prepare($query);
         $stmt->bind_param('i', $id);
@@ -45,6 +50,13 @@ class PurchaseOrderRepository
         $purchaseOrder = new PurchaseOrder();
         $purchaseOrder->hydrate($order);
 
-        return $purchaseOrder;
+        $orderDetails = null;
+
+        if ($order['ORDER_DETAILS']) {
+            $orderDetails = new OrderDetails();
+            $orderDetails->hydrate($order);
+        }
+
+        return [$purchaseOrder, $orderDetails];
     }
 }

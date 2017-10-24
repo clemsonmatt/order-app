@@ -55,7 +55,7 @@ $orders     = $repository->findAllOrders();
                 </table>
                 <hr>
                 <h4>Order Details</h4>
-                <p>Details would go here...</p>
+                <p id="js-modal-order-details"></p>
             </div>
         </div>
     </div>

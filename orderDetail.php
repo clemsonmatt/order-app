@@ -7,10 +7,10 @@ function is_ajax() {
 }
 
 function getOrder($orderId) {
-    $purchaseRepository = new PurchaseOrderRepository();
-    $order              = $purchaseRepository->findOrderById($orderId);
+    $purchaseRepository         = new PurchaseOrderRepository();
+    list($order, $orderDetails) = $purchaseRepository->findOrderById($orderId);
 
-    return $order;
+    return [$order, $orderDetails];
 }
 
 if (is_ajax()):
@@ -20,7 +20,9 @@ if (is_ajax()):
         return;
     }
 
-    echo json_encode(getOrder($_POST["orderId"]));
+    list($order, $orderDetails) = getOrder($_POST["orderId"]);
+
+    echo json_encode(['order' => $order, 'orderDetails' => $orderDetails]);
 else:
     require_once('header.php');
 
@@ -30,7 +32,7 @@ else:
         return;
     }
 
-    $order = getOrder($_GET["orderId"]);
+    list($order, $orderDetails) = getOrder($_GET["orderId"]);
 
 ?>
 
@@ -79,7 +81,15 @@ else:
             <hr>
 
             <h4>Order Details</h4>
-            <p>Details would go here...</p>
+            <p>
+                <?php
+                    if ($orderDetails) {
+                        echo $orderDetails->getOrderDetails();
+                    } else {
+                        echo 'No details';
+                    }
+                ?>
+            </p>
         <?php endif; ?>
     </div>
 
