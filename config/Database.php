@@ -17,7 +17,7 @@ class Database
 
     public function getOracleConnection()
     {
-        $conn = oci_connect($DB_USER, $DB_PASS, $DB_HOST);
+        $conn = oci_connect(DB_USER, DB_PASS, DB_HOST);
 
         if (! $conn) {
             $e = oci_error();
