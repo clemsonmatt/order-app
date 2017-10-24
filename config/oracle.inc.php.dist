@@ -1,0 +1,4 @@
+const DB_HOST = "example.com";
+const DB_USER = "username";
+const DB_PASS = "password";
+const DB_NAME = "db_name";

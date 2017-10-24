@@ -6,6 +6,7 @@
 
             // first empty anything that could be there already
             $('#js-modal-order-summary').empty();
+            $('#js-modal-order-details').empty()
 
             var orderId = $(this).data('order-id');
 
@@ -18,14 +19,20 @@
                 success: function(data) {
                     var tr;
 
-                    $.each(data, function(key, value){
+                    $.each(data.order, function(key, value){
                         if (typeof value == 'object' && 'date' in value) {
                             value = value.date;
                         }
 
                         tr = "<tr><th>" + key + "</th><td>" + value + "</td></tr>";
                         $('#js-modal-order-summary').append(tr);
-                    })
+                    });
+
+                    if (data.orderDetails == null) {
+                        $('#js-modal-order-details').append('No details.');
+                    } else {
+                        $('#js-modal-order-details').append(data.orderDetails.orderDetails);
+                    }
 
                     $('#js-order-modal').modal();
                 }

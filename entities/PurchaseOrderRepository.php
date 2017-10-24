@@ -1,50 +1,62 @@
 <?php
 
+require_once('OrderDetails.php');
 require_once('PurchaseOrder.php');
+require_once('config/Database.php');
 
 class PurchaseOrderRepository
 {
     public function findAllOrders()
     {
-        $orders = [];
+        $db   = new Database();
+        $conn = $db->getConnection();
 
-        for ($i = 0; $i < 10; $i++) {
-            $orders[] = $this->createOrder();
+        $result = $conn->query("SELECT * FROM `EXAMPLE.TEST_DATA_SUMMARY`");
+
+        $purchaseOrders = [];
+
+        while ($order = $result->fetch_assoc()) {
+            $purchaseOrder = new PurchaseOrder();
+            $purchaseOrder->hydrate($order);
+
+            $purchaseOrders[] = $purchaseOrder;
         }
 
-        return $orders;
+        return $purchaseOrders;
     }
 
     public function findOrderById(int $id)
     {
-        $order = $this->createOrder($id);
+        $db   = new Database();
+        $conn = $db->getConnection();
 
-        return $order;
-    }
+        $query = "
+            SELECT tds.*, tdd.ORDER_DETAILS FROM `EXAMPLE.TEST_DATA_SUMMARY` tds
+            LEFT JOIN `EXAMPLE.TEST_DATA_DETAIL` tdd ON tds.SRC_ORDER_ID = tdd.SRC_ORDER_ID
+            WHERE tds.PRIMARY_KEY = ?
+        ";
 
-    private function createId()
-    {
-        return substr(hexdec(uniqid(rand(10000,99999), true)), 6, 6);
-    }
+        $stmt = $conn->prepare($query);
+        $stmt->bind_param('i', $id);
+        $stmt->execute();
 
-    private function createOrder($id = null)
-    {
-        $date = new \DateTime();
+        $result = $stmt->get_result();
+        $order  = $result->fetch_assoc();
 
-        if (! $id) {
-            $id = $this->createId();
+        if (! $order) {
+            return;
         }
 
         $purchaseOrder = new PurchaseOrder();
-        $purchaseOrder->setId($id);
-        $purchaseOrder->setOrderAccountName('John Doe');
-        $purchaseOrder->setBillingAccountNumber(1234567);
-        $purchaseOrder->setSrcCustomerId(7654321);
-        $purchaseOrder->setSrcOrderId(1000);
-        $purchaseOrder->setWipMrc(50.00);
-        $purchaseOrder->setFirstSdAcceptedDate($date->modify('-5 days'));
-        $purchaseOrder->setPipelineReportedDate($date);
+        $purchaseOrder->hydrate($order);
 
-        return $purchaseOrder;
+        $orderDetails = null;
+
+        if ($order['ORDER_DETAILS']) {
+            $orderDetails = new OrderDetails();
+            $orderDetails->hydrate($order);
+        }
+
+        return [$purchaseOrder, $orderDetails];
     }
 }

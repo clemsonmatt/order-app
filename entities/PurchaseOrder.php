@@ -20,6 +20,27 @@ class PurchaseOrder implements JsonSerializable
         return get_object_vars($this);
     }
 
+    public function hydrate(array $result)
+    {
+        foreach ($result as $name => $value) {
+            if ($name == 'PRIMARY_KEY') {
+                $name = 'Id';
+            } else {
+                if (in_array($name, ['FIRST_SD_ACCEPTED_DATE', 'PIPELINE_REPORTED_DATE'])) {
+                    $value = new \DateTime($value);
+                }
+
+                $name = str_replace('_', ' ', $name);
+                $name = ucwords($name);
+                $name = str_replace(' ', '', $name);
+            }
+
+            if (method_exists($this, 'set'.$name)) {
+                $this->{'set'.$name}($value);
+            }
+        }
+    }
+
     private $id;
     private $orderAccountName;
     private $billingAccountNumber;

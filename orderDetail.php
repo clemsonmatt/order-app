@@ -7,10 +7,10 @@ function is_ajax() {
 }
 
 function getOrder($orderId) {
-    $purchaseRepository = new PurchaseOrderRepository();
-    $order              = $purchaseRepository->findOrderById($orderId);
+    $purchaseRepository         = new PurchaseOrderRepository();
+    list($order, $orderDetails) = $purchaseRepository->findOrderById($orderId);
 
-    return $order;
+    return [$order, $orderDetails];
 }
 
 if (is_ajax()):
@@ -20,7 +20,9 @@ if (is_ajax()):
         return;
     }
 
-    echo json_encode(getOrder($_POST["orderId"]));
+    list($order, $orderDetails) = getOrder($_POST["orderId"]);
+
+    echo json_encode(['order' => $order, 'orderDetails' => $orderDetails]);
 else:
     require_once('header.php');
 
@@ -30,50 +32,65 @@ else:
         return;
     }
 
-    $order = getOrder($_GET["orderId"]);
+    list($order, $orderDetails) = getOrder($_GET["orderId"]);
+
 ?>
 
     <div class="container">
         <h4>Order Summary</h4>
         <table class="table table-striped">
-            <tr>
-                <th>ID</th>
-                <td><?php echo $order->getId(); ?></td>
-            </tr>
-            <tr>
-                <th>Order Account Name</th>
-                <td><?php echo $order->getOrderAccountName(); ?></td>
-            </tr>
-            <tr>
-                <th>Billing Account Number</th>
-                <td><?php echo $order->getBillingAccountNumber(); ?></td>
-            </tr>
-            <tr>
-                <th>Customer ID</th>
-                <td><?php echo $order->getSrcCustomerId(); ?></td>
-            </tr>
-            <tr>
-                <th>Order ID</th>
-                <td><?php echo $order->getSrcOrderId(); ?></td>
-            </tr>
-            <tr>
-                <th>WIP MRC</th>
-                <td><?php echo $order->getWipMrc(); ?></td>
-            </tr>
-            <tr>
-                <th>Service Delivery Date</th>
-                <td><?php echo $order->getFirstSdAcceptedDate()->format('m/d/Y'); ?></td>
-            </tr>
-            <tr>
-                <th>Pipeline Date</th>
-                <td><?php echo $order->getPipelineReportedDate()->format('m/d/Y'); ?></td>
-            </tr>
-        </table>
+            <?php if (! $order): ?>
+                <tr>
+                    <td colspan="2">No order found.</td>
+                </tr>
+            <?php else: ?>
+                <tr>
+                    <th>ID</th>
+                    <td><?php echo $order->getId(); ?></td>
+                </tr>
+                <tr>
+                    <th>Order Account Name</th>
+                    <td><?php echo $order->getOrderAccountName(); ?></td>
+                </tr>
+                <tr>
+                    <th>Billing Account Number</th>
+                    <td><?php echo $order->getBillingAccountNumber(); ?></td>
+                </tr>
+                <tr>
+                    <th>Customer ID</th>
+                    <td><?php echo $order->getSrcCustomerId(); ?></td>
+                </tr>
+                <tr>
+                    <th>Order ID</th>
+                    <td><?php echo $order->getSrcOrderId(); ?></td>
+                </tr>
+                <tr>
+                    <th>WIP MRC</th>
+                    <td><?php echo $order->getWipMrc(); ?></td>
+                </tr>
+                <tr>
+                    <th>Service Delivery Date</th>
+                    <td><?php echo $order->getFirstSdAcceptedDate()->format('m/d/Y'); ?></td>
+                </tr>
+                <tr>
+                    <th>Pipeline Date</th>
+                    <td><?php echo $order->getPipelineReportedDate()->format('m/d/Y'); ?></td>
+                </tr>
+            </table>
 
-        <hr>
+            <hr>
 
-        <h4>Order Details</h4>
-        <p>Details would go here...</p>
+            <h4>Order Details</h4>
+            <p>
+                <?php
+                    if ($orderDetails) {
+                        echo $orderDetails->getOrderDetails();
+                    } else {
+                        echo 'No details';
+                    }
+                ?>
+            </p>
+        <?php endif; ?>
     </div>
 
 <?php
